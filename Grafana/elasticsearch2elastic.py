@@ -11,13 +11,15 @@ from elasticsearch import Elasticsearch
 es_host = os.environ.get('ES_HOST', 'elasticsearch')
 es_user = os.environ.get('ES_USER', 'elastic')
 es_pwd = os.environ.get('ES_PWD', 'changeme!')
+es_use_ssl = bool(os.environ.get('ES_USE_SSL', True))
+es_verify_certs = bool(os.environ.get('ES_VERIFY_CERTS', True))
 
 es = Elasticsearch(
     [es_host],
     http_auth=(es_user, es_pwd),
     port=443,
-    use_ssl=True,
-    verify_certs=True,
+    use_ssl=es_use_ssl,
+    verify_certs=es_verify_certs,
     ca_certs=certifi.where()
     )
 
@@ -27,9 +29,7 @@ elasticIndex = os.environ.get('ES_METRICS_INDEX_NAME', 'elasticsearch_metrics')
 def fetch_clusterhealth():
     try:
         utc_datetime = datetime.datetime.utcnow()
-        endpoint = "/_cluster/health"
-        data = json.dumps(es.cluster.health())
-        jsonData = json.loads(data)
+        jsonData = es.cluster.health()
         clusterName = jsonData['cluster_name']
         jsonData['@timestamp'] = str(utc_datetime.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3])
         if jsonData['status'] == 'green':
@@ -63,8 +63,7 @@ def fetch_nodestats(clusterName):
 
 def fetch_indexstats(clusterName):
     utc_datetime = datetime.datetime.utcnow()
-    data = json.dumps(es.indices.stats())
-    jsonData = json.loads(data)
+    jsonData = es.indices.stats()
     jsonData['_all']['@timestamp'] = str(utc_datetime.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3])
     jsonData['_all']['cluster_name'] = clusterName
     post_data(jsonData['_all'])
