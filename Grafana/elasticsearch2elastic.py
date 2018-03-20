@@ -38,17 +38,6 @@ def fetch_clusterhealth():
         clusterName = "unknown"
         return clusterName
 
-
-def fetch_clusterstats():
-    utc_datetime = datetime.datetime.utcnow()
-    endpoint = "/_cluster/stats"
-    urlData = elasticServer + endpoint
-    response = urllib.urlopen(urlData)
-    jsonData = json.loads(response.read())
-    jsonData['@timestamp'] = str(utc_datetime.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3])
-    post_data(jsonData)
-
-
 def fetch_nodestats(clusterName):
     utc_datetime = datetime.datetime.utcnow()
     endpoint = "/_cat/nodes?v&h=n"
@@ -97,7 +86,6 @@ def post_data(data):
 def main():
     clusterName = fetch_clusterhealth()
     if clusterName != "unknown":
-        fetch_clusterstats()
         fetch_nodestats(clusterName)
         fetch_indexstats(clusterName)
 
