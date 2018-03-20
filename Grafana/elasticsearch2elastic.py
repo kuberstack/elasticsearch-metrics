@@ -12,12 +12,13 @@ es_host = os.environ.get('ES_HOST', 'elasticsearch')
 es_user = os.environ.get('ES_USER', 'elastic')
 es_pwd = os.environ.get('ES_PWD', 'changeme!')
 es_use_ssl = bool(os.environ.get('ES_USE_SSL', True))
+es_port = int(os.environ.get('ES_PORT', 443))
 es_verify_certs = bool(os.environ.get('ES_VERIFY_CERTS', True))
 
 es = Elasticsearch(
     [es_host],
     http_auth=(es_user, es_pwd),
-    port=443,
+    port=es_port,
     use_ssl=es_use_ssl,
     verify_certs=es_verify_certs,
     ca_certs=certifi.where()
